@@ -1,9 +1,8 @@
-// ContentView.swift (versión correcta con environment)
 import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appointmentsVM: AppointmentsViewModel
-    
+
     var body: some View {
         TabView {
             NavigationStack {
@@ -12,7 +11,7 @@ struct ContentView: View {
             .tabItem {
                 Label("Reservar", systemImage: "scissors")
             }
-            
+
             NavigationStack {
                 AppointmentsView()
             }
@@ -20,6 +19,6 @@ struct ContentView: View {
                 Label("Mis citas", systemImage: "calendar.badge.clock")
             }
         }
-        .tint(Color.primary)
+        .tint(Color.brandWood)
     }
 }

@@ -9,49 +9,57 @@ struct BookingView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+        ZStack {
+            Color.brandBackground.ignoresSafeArea()
 
-                BookingSummaryCard(barber: barber, service: service)
-                    .padding(.horizontal)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 28) {
 
-                VStack(alignment: .leading, spacing: 12) {
-                    SectionHeader(title: "Elige el día", icon: "calendar")
-                    DatePicker(
-                        "Fecha",
-                        selection: $vm.selectedDate,
-                        in: vm.minimumDate...vm.maximumDate,
-                        displayedComponents: .date
-                    )
-                    .datePickerStyle(.graphical)
-                    .padding(.horizontal)
-                    .onChange(of: vm.selectedDate) {
-                        vm.selectedHour = nil
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    SectionHeader(title: "Elige la hora", icon: "clock")
-                    TimeGrid(slots: vm.availableSlots, selected: $vm.selectedHour)
+                    BookingSummaryCard(barber: barber, service: service)
                         .padding(.horizontal)
-                }
 
-                Button(action: {
-                    vm.confirmBooking()
-                    showSuccess = true
-                }) {
-                    Label("Confirmar cita", systemImage: "checkmark.circle.fill")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(vm.canBook ? Color.accentColor : Color(.systemGray4))
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    // Fecha
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionHeader(title: "Elige el día", icon: "calendar")
+                        DatePicker(
+                            "Fecha",
+                            selection: $vm.selectedDate,
+                            in: vm.minimumDate...vm.maximumDate,
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.graphical)
+                        .tint(Color.brandWood)
+                        .padding(.horizontal)
+                        .onChange(of: vm.selectedDate) {
+                            vm.selectedHour = nil
+                        }
+                    }
+
+                    // Hora
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionHeader(title: "Elige la hora", icon: "clock")
+                        TimeGrid(slots: vm.availableSlots, selected: $vm.selectedHour)
+                            .padding(.horizontal)
+                    }
+
+                    // Botón
+                    Button(action: {
+                        vm.confirmBooking()
+                        showSuccess = true
+                    }) {
+                        Text("Confirmar cita")
+                            .font(BrandFont.sans(15, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(vm.canBook ? Color.brandWood : Color.brandTextTertiary)
+                            .foregroundStyle(Color.brandBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .disabled(!vm.canBook)
+                    .padding(.horizontal)
                 }
-                .disabled(!vm.canBook)
-                .padding(.horizontal)
+                .padding(.vertical)
             }
-            .padding(.vertical)
         }
         .navigationTitle("Reservar cita")
         .navigationBarTitleDisplayMode(.inline)
@@ -59,7 +67,7 @@ struct BookingView: View {
             vm.selectedBarber = barber
             vm.selectedService = service
         }
-        .alert("¡Cita confirmada! 🎉", isPresented: $showSuccess) {
+        .alert("Cita confirmada", isPresented: $showSuccess) {
             Button("Ver mis citas") { dismiss() }
             Button("OK", role: .cancel) { dismiss() }
         } message: {
@@ -68,33 +76,41 @@ struct BookingView: View {
     }
 }
 
-// MARK: - Subviews
-
 struct BookingSummaryCard: View {
     let barber: Barber
     let service: BarberService
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: "scissors")
-                .font(.title2)
-                .foregroundStyle(.secondary)
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.brandWood.opacity(0.1))
                 .frame(width: 48, height: 48)
-                .background(Color(.systemGray6))
-                .clipShape(Circle())
+                .overlay {
+                    Image(systemName: "scissors")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Color.brandWood)
+                }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(service.name).font(.headline)
-                Text("con \(barber.name)").font(.subheadline).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(service.name)
+                    .font(BrandFont.sans(15, weight: .semibold))
+                    .foregroundStyle(Color.brandTextPrimary)
+                Text("con \(barber.name)")
+                    .font(BrandFont.sans(13))
+                    .foregroundStyle(Color.brandTextSecondary)
             }
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("$\(Int(service.price))").font(.headline)
-                Text("\(service.duration) min").font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .trailing, spacing: 3) {
+                Text("$\(Int(service.price))")
+                    .font(BrandFont.sans(16, weight: .semibold))
+                    .foregroundStyle(Color.brandWood)
+                Text("\(service.duration) min")
+                    .font(BrandFont.sans(12))
+                    .foregroundStyle(Color.brandTextTertiary)
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
+        .padding(16)
+        .background(Color.brandSurfaceAlt)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
@@ -104,9 +120,18 @@ struct SectionHeader: View {
     let icon: String
 
     var body: some View {
-        Label(title, systemImage: icon)
-            .font(.title3.bold())
-            .padding(.horizontal)
+        HStack(spacing: 8) {
+            Rectangle()
+                .fill(Color.brandWood)
+                .frame(width: 3, height: 16)
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundStyle(Color.brandWood)
+            Text(title)
+                .font(BrandFont.sans(15, weight: .semibold))
+                .foregroundStyle(Color.brandTextPrimary)
+        }
+        .padding(.horizontal)
     }
 }
 
@@ -146,31 +171,32 @@ struct TimeSlotButton: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.subheadline.weight(isSelected ? .bold : .regular))
+                .font(BrandFont.sans(13, weight: isSelected ? .semibold : .regular))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(background)
                 .foregroundStyle(foreground)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(Color.accentColor, lineWidth: 2)
-                    }
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(
+                            isSelected ? Color.brandWood : Color.brandSurfaceAlt,
+                            lineWidth: isSelected ? 1.5 : 1
+                        )
                 }
         }
         .disabled(!available)
     }
 
     var background: Color {
-        if !available { return Color(.systemGray6) }
-        if isSelected { return Color.accentColor.opacity(0.15) }
-        return Color(.systemBackground)
+        if !available { return Color.brandSurfaceAlt }
+        if isSelected { return Color.brandWood.opacity(0.1) }
+        return Color.brandSurface
     }
 
     var foreground: Color {
-        if !available { return Color(.systemGray3) }
-        if isSelected { return .accentColor }
-        return .primary
+        if !available { return Color.brandTextTertiary }
+        if isSelected { return Color.brandWood }
+        return Color.brandTextPrimary
     }
 }

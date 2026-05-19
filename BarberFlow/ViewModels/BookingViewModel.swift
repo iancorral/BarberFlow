@@ -29,8 +29,15 @@ class BookingViewModel: ObservableObject {
     
     // Slots disponibles (trabajamos 9am-6pm)
     var availableSlots: [(hour: Int, available: Bool)] {
-        SampleData.workingHours().map { hour in
-            (hour: hour, available: !bookedHours.contains(hour))
+        let calendar = Calendar.current
+        let now = Date()
+        let isToday = calendar.isDateInToday(selectedDate)
+        let currentHour = calendar.component(.hour, from: now)
+
+        return SampleData.workingHours().map { hour in
+            let hourHasPassed = isToday && hour <= currentHour
+            let alreadyBooked = bookedHours.contains(hour)
+            return (hour: hour, available: !alreadyBooked && !hourHasPassed)
         }
     }
     
